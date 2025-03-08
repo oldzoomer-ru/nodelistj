@@ -11,20 +11,12 @@ public enum Keywords {
     PVT("Pvt"),
     HOLD("Hold"),
     DOWN("Down"),
-    NULL;
+    NULL("###");
 
     private final String keyword;
 
     Keywords(String keyword) {
         this.keyword = keyword;
-    }
-
-    Keywords() {
-        this.keyword = "";
-    }
-
-    public String toString() {
-        return keyword;
     }
 
     /**
@@ -39,5 +31,14 @@ public enum Keywords {
             }
         }
         return NULL;
+    }
+
+    /**
+     * Get keyword value
+     * @return keyword value
+     */
+    @Override
+    public String toString() {
+        return keyword;
     }
 }
