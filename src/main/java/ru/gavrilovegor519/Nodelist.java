@@ -74,7 +74,7 @@ public class Nodelist {
      * @param network network number
      * @return list of nodes from the specified network
      */
-    public List<NodelistEntryDto> getNodelistEntries(int zone, int network) {
+    public List<NodelistEntryDto> getNetworkNodelistEntries(int zone, int network) {
         return nodelistEntries.stream()
                 .filter(nodelistEntryDto -> nodelistEntryDto.getNumber() == zone)
                 .findFirst()
@@ -92,7 +92,7 @@ public class Nodelist {
      * @param zone zone number
      * @return list of nodes from the specified zone
      */
-    public List<NodelistEntryDto> getNodelistEntries(int zone) {
+    public List<NodelistEntryDto> getZoneNodelistEntries(int zone) {
         return nodelistEntries.stream()
                 .filter(nodelistEntryDto -> nodelistEntryDto.getNumber() == zone)
                 .findFirst()
