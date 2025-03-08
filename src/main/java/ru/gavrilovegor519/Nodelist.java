@@ -68,6 +68,39 @@ public class Nodelist {
     }
 
     /**
+     * Get a list of nodes from the specified network
+     *
+     * @param zone zone number
+     * @param network network number
+     * @return list of nodes from the specified network
+     */
+    public List<NodelistEntryDto> getNodelistEntries(int zone, int network) {
+        return nodelistEntries.stream()
+                .filter(nodelistEntryDto -> nodelistEntryDto.getNumber() == zone)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Zone not found"))
+                .getChildren().stream()
+                .filter(nodelistEntryDto -> nodelistEntryDto.getNumber() == network)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Network not found"))
+                .getChildren();
+    }
+
+    /**
+     * Returns a list of nodes from the specified zone
+     *
+     * @param zone zone number
+     * @return list of nodes from the specified zone
+     */
+    public List<NodelistEntryDto> getNodelistEntries(int zone) {
+        return nodelistEntries.stream()
+                .filter(nodelistEntryDto -> nodelistEntryDto.getNumber() == zone)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Zone not found"))
+                .getChildren();
+    }
+
+    /**
      * Reads Fidonet nodelist and indexes it in memory
      *
      * @param reader Nodelist file reader
