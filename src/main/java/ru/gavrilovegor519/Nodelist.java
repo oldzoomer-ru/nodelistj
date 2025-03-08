@@ -107,7 +107,7 @@ public class Nodelist {
      */
     private void indexNodelist(InputStreamReader reader) {
         try (BufferedReader bufferedReader = new BufferedReader(reader)) {
-            CurrentNodelistTree currentKeyword = null;
+            CurrentNodelistTree currentNodelistTree = null;
 
             while (bufferedReader.ready()) {
                 String line = bufferedReader.readLine();
@@ -122,14 +122,14 @@ public class Nodelist {
 
                 if (Keywords.fromString(splitLine[0]) == Keywords.ZONE) {
                     nodelistEntries.add(generateNodelistEntry(splitLine));
-                    currentKeyword = CurrentNodelistTree.ZONE;
+                    currentNodelistTree = CurrentNodelistTree.ZONE;
                 } else if (Keywords.fromString(splitLine[0]) == Keywords.HOST || Keywords.fromString(splitLine[0]) == Keywords.REGION) {
                     nodelistEntries.getLast().getChildren().add(generateNodelistEntry(splitLine));
-                    currentKeyword = CurrentNodelistTree.NETWORK;
+                    currentNodelistTree = CurrentNodelistTree.NETWORK;
                 } else {
-                    if (currentKeyword == CurrentNodelistTree.ZONE) {
+                    if (currentNodelistTree == CurrentNodelistTree.ZONE) {
                         nodelistEntries.getLast().getChildren().add(generateNodelistEntry(splitLine));
-                    } else if (currentKeyword == CurrentNodelistTree.NETWORK) {
+                    } else if (currentNodelistTree == CurrentNodelistTree.NETWORK) {
                         nodelistEntries.getLast().getChildren().getLast().getChildren().add(generateNodelistEntry(splitLine));
                     }
                 }
