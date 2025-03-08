@@ -1,11 +1,8 @@
 package ru.gavrilovegor519.enums;
 
-import lombok.Getter;
-
 /**
  * Fidonet nodelist keywords
  */
-@Getter
 public enum Keywords {
     ZONE("Zone"),
     REGION("Region"),
@@ -24,6 +21,10 @@ public enum Keywords {
 
     Keywords() {
         this.keyword = "";
+    }
+
+    public String toString() {
+        return keyword;
     }
 
     /**
