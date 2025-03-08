@@ -112,25 +112,25 @@ public class Nodelist {
             while (bufferedReader.ready()) {
                 String line = bufferedReader.readLine();
 
-                if (line.startsWith(";") || line.isBlank()) continue;
+                if (!line.startsWith(";") || !line.isBlank()) {
+                    if (line.startsWith(",")) line = "###" + line; // Fixes an issue with the empty keyword at the beginning of the nodelist
 
-                if (line.startsWith(",")) line = "###" + line; // Fixes an issue with the empty keyword at the beginning of the nodelist
+                    String[] splitLine = line.split(",");
 
-                String[] splitLine = line.split(",");
-
-                if (splitLine.length < 7) continue;
-
-                if (Keywords.fromString(splitLine[0]) == Keywords.ZONE) {
-                    nodelistEntries.add(generateNodelistEntry(splitLine));
-                    currentNodelistTree = CurrentNodelistTree.ZONE;
-                } else if (Keywords.fromString(splitLine[0]) == Keywords.HOST || Keywords.fromString(splitLine[0]) == Keywords.REGION) {
-                    nodelistEntries.getLast().getChildren().add(generateNodelistEntry(splitLine));
-                    currentNodelistTree = CurrentNodelistTree.NETWORK;
-                } else {
-                    if (currentNodelistTree == CurrentNodelistTree.ZONE) {
-                        nodelistEntries.getLast().getChildren().add(generateNodelistEntry(splitLine));
-                    } else if (currentNodelistTree == CurrentNodelistTree.NETWORK) {
-                        nodelistEntries.getLast().getChildren().getLast().getChildren().add(generateNodelistEntry(splitLine));
+                    if (splitLine.length >= 7) {
+                        if (Keywords.fromString(splitLine[0]) == Keywords.ZONE) {
+                            nodelistEntries.add(generateNodelistEntry(splitLine));
+                            currentNodelistTree = CurrentNodelistTree.ZONE;
+                        } else if (Keywords.fromString(splitLine[0]) == Keywords.HOST || Keywords.fromString(splitLine[0]) == Keywords.REGION) {
+                            nodelistEntries.getLast().getChildren().add(generateNodelistEntry(splitLine));
+                            currentNodelistTree = CurrentNodelistTree.NETWORK;
+                        } else {
+                            if (currentNodelistTree == CurrentNodelistTree.ZONE) {
+                                nodelistEntries.getLast().getChildren().add(generateNodelistEntry(splitLine));
+                            } else if (currentNodelistTree == CurrentNodelistTree.NETWORK) {
+                                nodelistEntries.getLast().getChildren().getLast().getChildren().add(generateNodelistEntry(splitLine));
+                            }
+                        }
                     }
                 }
             }
@@ -154,7 +154,7 @@ public class Nodelist {
                 .sysOpName(splitLine[4])
                 .phone(splitLine[5])
                 .baudRate(Integer.parseInt(splitLine[6]))
-                .flags(Arrays.copyOf(splitLine, 7))
+                .flags(Arrays.copyOfRange(splitLine, 7, splitLine.length))
                 .children(new ArrayList<>())
                 .build();
     }
