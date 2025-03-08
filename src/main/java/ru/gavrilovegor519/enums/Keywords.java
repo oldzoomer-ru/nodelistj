@@ -11,7 +11,7 @@ public enum Keywords {
     PVT("Pvt"),
     HOLD("Hold"),
     DOWN("Down"),
-    NULL();
+    NULL;
 
     private final String keyword;
 
