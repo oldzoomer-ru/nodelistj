@@ -1,6 +1,6 @@
 package ru.gavrilovegor519;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.gavrilovegor519.dto.NodelistEntryDto;
 
@@ -13,15 +13,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class NodelistTest {
 
-    private Nodelist nodelist;
+    private static Nodelist nodelist;
 
     /**
      * Initializes nodelist object with correct path to nodelist.txt file.
      * @throws URISyntaxException thrown if path is incorrect.
      */
-    @BeforeEach
-    void setUp() throws URISyntaxException {
-        Path path = Paths.get(Objects.requireNonNull(getClass().getResource("/nodelist.txt")).toURI());
+    @BeforeAll
+    static void setUp() throws URISyntaxException {
+        Path path = Paths.get(Objects.requireNonNull(NodelistTest.class.getResource("/nodelist.txt")).toURI());
         nodelist = new Nodelist(path);
     }
 
