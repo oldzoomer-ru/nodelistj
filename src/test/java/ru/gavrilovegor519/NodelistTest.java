@@ -53,7 +53,7 @@ public class NodelistTest {
      * Checks that nodelist object is working correctly.
      */
     @Test
-    void testGetNodelistEntryWithCorrectAddressDto() {
+    void testDataFromNodelist() {
         NodelistEntryDto entryDto = nodelist.getNodelistEntry("2:5015/519");
         assertEquals(519, entryDto.getNumber());
         assertEquals("GavrilovNode", entryDto.getNodeName());
