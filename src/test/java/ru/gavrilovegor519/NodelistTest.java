@@ -2,6 +2,7 @@ package ru.gavrilovegor519;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.gavrilovegor519.dto.NodelistEntryDto;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -45,6 +46,22 @@ public class NodelistTest {
      */
     @Test
     void testGetNodelistEntryWithCorrectAddress() {
-        assertDoesNotThrow(() -> nodelist.getNodelistEntry("2:5015/46"));
+        assertDoesNotThrow(() -> nodelist.getNodelistEntry("2:5015/519"));
+    }
+
+    /**
+     * Checks that nodelist object is working correctly.
+     */
+    @Test
+    void testGetNodelistEntryWithCorrectAddressDto() {
+        NodelistEntryDto entryDto = nodelist.getNodelistEntry("2:5015/519");
+        assertEquals(519, entryDto.getNumber());
+        assertEquals("GavrilovNode", entryDto.getNodeName());
+        assertEquals("Kstovo_Russia", entryDto.getLocation());
+        assertEquals("Egor_Gavrilov", entryDto.getSysOpName());
+        assertEquals("-Unpublished-", entryDto.getPhone());
+        assertEquals(300, entryDto.getBaudRate());
+        String[] flags = entryDto.getFlags();
+        assertArrayEquals(new String[]{"CM", "IBN", "INA:gavrilovegor519.ru"}, flags);
     }
 }
