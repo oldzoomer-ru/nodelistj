@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Fidonet Nodelist parser
@@ -45,13 +47,15 @@ public class Nodelist {
             throw new IllegalArgumentException("Address is null");
         }
 
-        if (!address.matches("^[0-9]+:[0-9]+/[0-9]+$")) {
+        Matcher matcher = Pattern.compile("^([0-9]+):([0-9]+)/([0-9]+)$").matcher(address);
+
+        if (!matcher.matches()) {
             throw new IllegalArgumentException("Incorrect address format");
         }
 
-        int zone = Integer.parseInt(address.substring(0, address.indexOf(":")));
-        int network = Integer.parseInt(address.substring(address.indexOf(":") + 1, address.indexOf("/")));
-        int node = Integer.parseInt(address.substring(address.indexOf("/") + 1));
+        int zone = Integer.parseInt(matcher.group(1));
+        int network = Integer.parseInt(matcher.group(2));
+        int node = Integer.parseInt(matcher.group(3));
 
         return nodelistEntries.stream()
                 .filter(nodelistEntryDto -> nodelistEntryDto.getNumber() == zone)
