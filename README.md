@@ -9,4 +9,4 @@ review, etc).
 GigaCode makes a big count of mistakes in code generation, that's why
 mostly this library written by me, not by GigaCode. And I'm make library
 with small footprint (except Lombok and jUnit5, nothing else libraries
-is used).
+is used) - **10 Kbytes in JAR**.
