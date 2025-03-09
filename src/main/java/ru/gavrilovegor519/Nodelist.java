@@ -6,6 +6,7 @@ import ru.gavrilovegor519.enums.Keywords;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,6 +35,10 @@ public class Nodelist {
         } catch (IOException e) {
             throw new IllegalArgumentException("Cannot read file", e);
         }
+    }
+
+    public Nodelist(InputStream inputStream) {
+        indexNodelist(new InputStreamReader(inputStream));
     }
 
     /**
