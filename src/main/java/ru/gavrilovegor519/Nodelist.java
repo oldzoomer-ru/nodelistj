@@ -49,23 +49,14 @@ public class Nodelist {
         indexNodelist(inputStream);
     }
 
-    public NodelistEntryDto getNodelistEntry(int zone, int network, int node) {
-        if (zone < 1 || network < 1 || node < 0) {
-            throw new IllegalArgumentException("Zone, network or node is not valid");
-        }
-
-        return nodelistEntries.stream()
-                .filter(nodelistEntryDto -> nodelistEntryDto.number() == zone)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Zone not found"))
-                .children().stream()
-                .filter(nodelistEntryDto -> nodelistEntryDto.number() == network)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Network not found"))
-                .children().stream()
-                .filter(nodelistEntryDto -> nodelistEntryDto.number() == node)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Node not found"));
+    /**
+     * Get all data from nodelist
+     * @return {@link List} of {@link NodelistEntryDto} with data from the nodelist
+     * *
+     * @see NodelistEntryDto
+     */
+    public List<NodelistEntryDto> getNodelistEntries() {
+        return nodelistEntries;
     }
 
     /**
@@ -90,6 +81,25 @@ public class Nodelist {
         int node = Integer.parseInt(matcher.group(3));
 
         return getNodelistEntry(zone, network, node);
+    }
+
+    public NodelistEntryDto getNodelistEntry(int zone, int network, int node) {
+        if (zone < 1 || network < 1 || node < 0) {
+            throw new IllegalArgumentException("Zone, network or node is not valid");
+        }
+
+        return nodelistEntries.stream()
+                .filter(nodelistEntryDto -> nodelistEntryDto.number() == zone)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Zone not found"))
+                .children().stream()
+                .filter(nodelistEntryDto -> nodelistEntryDto.number() == network)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Network not found"))
+                .children().stream()
+                .filter(nodelistEntryDto -> nodelistEntryDto.number() == node)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Node not found"));
     }
 
     /**
