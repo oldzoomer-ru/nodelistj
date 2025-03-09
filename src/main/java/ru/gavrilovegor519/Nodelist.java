@@ -21,6 +21,10 @@ public class Nodelist {
 
     private final List<NodelistEntryDto> nodelistEntries = new ArrayList<>();
 
+    /**
+     * Nodelist constructor with path to nodelist
+     * @param path path to nodelist
+     */
     public Nodelist(Path path) {
         if (path == null) {
             throw new IllegalArgumentException("Path is null");
@@ -37,6 +41,10 @@ public class Nodelist {
         }
     }
 
+    /**
+     * Nodelist constructor with input stream
+     * @param inputStream input stream
+     */
     public Nodelist(InputStream inputStream) {
         indexNodelist(inputStream);
     }
