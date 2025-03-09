@@ -31,14 +31,14 @@ public class Nodelist {
         }
 
         try {
-            indexNodelist(new InputStreamReader(Files.newInputStream(path)));
+            indexNodelist(Files.newInputStream(path));
         } catch (IOException e) {
             throw new IllegalArgumentException("Cannot read file", e);
         }
     }
 
     public Nodelist(InputStream inputStream) {
-        indexNodelist(new InputStreamReader(inputStream));
+        indexNodelist(inputStream);
     }
 
     /**
@@ -112,10 +112,11 @@ public class Nodelist {
     /**
      * Reads Fidonet nodelist and indexes it in memory
      *
-     * @param reader Nodelist file reader
+     * @param streamReader {@link InputStream} of the nodelist
      */
-    private void indexNodelist(InputStreamReader reader) {
-        try (BufferedReader bufferedReader = new BufferedReader(reader)) {
+    private void indexNodelist(InputStream streamReader) {
+        try (InputStreamReader reader = new InputStreamReader(streamReader);
+                BufferedReader bufferedReader = new BufferedReader(reader)) {
             CurrentNodelistTree currentNodelistTree = null;
 
             while (bufferedReader.ready()) {
