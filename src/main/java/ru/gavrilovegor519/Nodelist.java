@@ -99,7 +99,7 @@ public class Nodelist {
      * @param network network number
      * @return list of nodes from the specified network
      */
-    public List<NodelistEntryDto> getNetworkNodelistEntries(int zone, int network) {
+    public NodelistEntryDto getNetworkNodelistEntries(int zone, int network) {
         return nodelistEntries.stream()
                 .filter(nodelistEntryDto -> nodelistEntryDto.number() == zone)
                 .findFirst()
@@ -107,8 +107,7 @@ public class Nodelist {
                 .children().stream()
                 .filter(nodelistEntryDto -> nodelistEntryDto.number() == network)
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Network not found"))
-                .children();
+                .orElseThrow(() -> new IllegalArgumentException("Network not found"));
     }
 
     /**
@@ -117,12 +116,11 @@ public class Nodelist {
      * @param zone zone number
      * @return list of nodes from the specified zone
      */
-    public List<NodelistEntryDto> getZoneNodelistEntries(int zone) {
+    public NodelistEntryDto getZoneNodelistEntries(int zone) {
         return nodelistEntries.stream()
                 .filter(nodelistEntryDto -> nodelistEntryDto.number() == zone)
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Zone not found"))
-                .children();
+                .orElseThrow(() -> new IllegalArgumentException("Zone not found"));
     }
 
     /**
