@@ -70,6 +70,10 @@ public class Nodelist {
         int network = Integer.parseInt(matcher.group(2));
         int node = Integer.parseInt(matcher.group(3));
 
+        if (zone < 1 || network < 1 || node < 0) {
+            throw new IllegalArgumentException("Zone, network or node is not valid");
+        }
+
         return nodelistEntries.stream()
                 .filter(nodelistEntryDto -> nodelistEntryDto.number() == zone)
                 .findFirst()
