@@ -55,13 +55,13 @@ public class NodelistTest {
     @Test
     void testDataFromNodelist() {
         NodelistEntryDto entryDto = nodelist.getNodelistEntry("2:5015/519");
-        assertEquals(519, entryDto.getNumber());
-        assertEquals("GavrilovNode", entryDto.getNodeName());
-        assertEquals("Kstovo_Russia", entryDto.getLocation());
-        assertEquals("Egor_Gavrilov", entryDto.getSysOpName());
-        assertEquals("-Unpublished-", entryDto.getPhone());
-        assertEquals(300, entryDto.getBaudRate());
-        String[] flags = entryDto.getFlags();
+        assertEquals(519, entryDto.number());
+        assertEquals("GavrilovNode", entryDto.nodeName());
+        assertEquals("Kstovo_Russia", entryDto.location());
+        assertEquals("Egor_Gavrilov", entryDto.sysOpName());
+        assertEquals("-Unpublished-", entryDto.phone());
+        assertEquals(300, entryDto.baudRate());
+        String[] flags = entryDto.flags();
         assertArrayEquals(new String[]{"CM", "IBN", "INA:gavrilovegor519.ru"}, flags);
     }
 

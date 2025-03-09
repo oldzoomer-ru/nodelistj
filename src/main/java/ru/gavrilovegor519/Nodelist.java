@@ -58,15 +58,15 @@ public class Nodelist {
         int node = Integer.parseInt(matcher.group(3));
 
         return nodelistEntries.stream()
-                .filter(nodelistEntryDto -> nodelistEntryDto.getNumber() == zone)
+                .filter(nodelistEntryDto -> nodelistEntryDto.number() == zone)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Zone not found"))
-                .getChildren().stream()
-                .filter(nodelistEntryDto -> nodelistEntryDto.getNumber() == network)
+                .children().stream()
+                .filter(nodelistEntryDto -> nodelistEntryDto.number() == network)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Network not found"))
-                .getChildren().stream()
-                .filter(nodelistEntryDto -> nodelistEntryDto.getNumber() == node)
+                .children().stream()
+                .filter(nodelistEntryDto -> nodelistEntryDto.number() == node)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Node not found"));
     }
@@ -80,14 +80,14 @@ public class Nodelist {
      */
     public List<NodelistEntryDto> getNetworkNodelistEntries(int zone, int network) {
         return nodelistEntries.stream()
-                .filter(nodelistEntryDto -> nodelistEntryDto.getNumber() == zone)
+                .filter(nodelistEntryDto -> nodelistEntryDto.number() == zone)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Zone not found"))
-                .getChildren().stream()
-                .filter(nodelistEntryDto -> nodelistEntryDto.getNumber() == network)
+                .children().stream()
+                .filter(nodelistEntryDto -> nodelistEntryDto.number() == network)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Network not found"))
-                .getChildren();
+                .children();
     }
 
     /**
@@ -98,10 +98,10 @@ public class Nodelist {
      */
     public List<NodelistEntryDto> getZoneNodelistEntries(int zone) {
         return nodelistEntries.stream()
-                .filter(nodelistEntryDto -> nodelistEntryDto.getNumber() == zone)
+                .filter(nodelistEntryDto -> nodelistEntryDto.number() == zone)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Zone not found"))
-                .getChildren();
+                .children();
     }
 
     /**
@@ -126,13 +126,13 @@ public class Nodelist {
                             nodelistEntries.add(generateNodelistEntry(splitLine));
                             currentNodelistTree = CurrentNodelistTree.ZONE;
                         } else if (Keywords.fromString(splitLine[0]) == Keywords.HOST || Keywords.fromString(splitLine[0]) == Keywords.REGION) {
-                            nodelistEntries.getLast().getChildren().add(generateNodelistEntry(splitLine));
+                            nodelistEntries.getLast().children().add(generateNodelistEntry(splitLine));
                             currentNodelistTree = CurrentNodelistTree.NETWORK;
                         } else {
                             if (currentNodelistTree == CurrentNodelistTree.ZONE) {
-                                nodelistEntries.getLast().getChildren().add(generateNodelistEntry(splitLine));
+                                nodelistEntries.getLast().children().add(generateNodelistEntry(splitLine));
                             } else if (currentNodelistTree == CurrentNodelistTree.NETWORK) {
-                                nodelistEntries.getLast().getChildren().getLast().getChildren().add(generateNodelistEntry(splitLine));
+                                nodelistEntries.getLast().children().getLast().children().add(generateNodelistEntry(splitLine));
                             }
                         }
                     }
@@ -150,17 +150,10 @@ public class Nodelist {
      * @return {@link NodelistEntryDto} with data from the line
      */
     private NodelistEntryDto generateNodelistEntry(String[] splitLine) {
-        return NodelistEntryDto.builder()
-                .keywords(Keywords.fromString(splitLine[0]))
-                .number(Integer.parseInt(splitLine[1]))
-                .nodeName(splitLine[2])
-                .location(splitLine[3])
-                .sysOpName(splitLine[4])
-                .phone(splitLine[5])
-                .baudRate(Integer.parseInt(splitLine[6]))
-                .flags(Arrays.copyOfRange(splitLine, 7, splitLine.length))
-                .children(new ArrayList<>())
-                .build();
+        return new NodelistEntryDto(Keywords.fromString(splitLine[0]),
+                Integer.parseInt(splitLine[1]), splitLine[2], splitLine[3],
+                splitLine[4], splitLine[5], Integer.parseInt(splitLine[6]),
+                Arrays.copyOfRange(splitLine, 7, splitLine.length), new ArrayList<>());
     }
 
 }
