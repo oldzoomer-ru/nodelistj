@@ -55,6 +55,7 @@ public class NodelistTest {
     @Test
     void testDataFromNodelist() {
         NodelistEntryDto entryDto = nodelist.getNodelistEntry("2:5015/519");
+        assertNull(entryDto.keywords());
         assertEquals(519, entryDto.number());
         assertEquals("GavrilovNode", entryDto.nodeName());
         assertEquals("Kstovo_Russia", entryDto.location());

@@ -10,8 +10,7 @@ public enum Keywords {
     HUB("Hub"),
     PVT("Pvt"),
     HOLD("Hold"),
-    DOWN("Down"),
-    NULL("###");
+    DOWN("Down");
 
     private final String keyword;
 
@@ -30,7 +29,7 @@ public enum Keywords {
                 return k;
             }
         }
-        return NULL;
+        return null;
     }
 
     /**
