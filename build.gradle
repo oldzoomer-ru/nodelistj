@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'maven-publish'
     id 'io.freefair.lombok' version '8.12.2.1'
 }
 
@@ -7,7 +8,16 @@ group = 'ru.gavrilovegor519'
 version = '1.0-SNAPSHOT'
 
 repositories {
+    mavenLocal()
     mavenCentral()
+}
+
+publishing {
+    publications {
+        nodelistj(MavenPublication) {
+            from components.java
+        }
+    }
 }
 
 dependencies {
