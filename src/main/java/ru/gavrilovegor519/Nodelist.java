@@ -49,6 +49,25 @@ public class Nodelist {
         indexNodelist(inputStream);
     }
 
+    public NodelistEntryDto getNodelistEntry(int zone, int network, int node) {
+        if (zone < 1 || network < 1 || node < 0) {
+            throw new IllegalArgumentException("Zone, network or node is not valid");
+        }
+
+        return nodelistEntries.stream()
+                .filter(nodelistEntryDto -> nodelistEntryDto.number() == zone)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Zone not found"))
+                .children().stream()
+                .filter(nodelistEntryDto -> nodelistEntryDto.number() == network)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Network not found"))
+                .children().stream()
+                .filter(nodelistEntryDto -> nodelistEntryDto.number() == node)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Node not found"));
+    }
+
     /**
      * Returns {@link NodelistEntryDto} by address
      *
@@ -70,22 +89,7 @@ public class Nodelist {
         int network = Integer.parseInt(matcher.group(2));
         int node = Integer.parseInt(matcher.group(3));
 
-        if (zone < 1 || network < 1 || node < 0) {
-            throw new IllegalArgumentException("Zone, network or node is not valid");
-        }
-
-        return nodelistEntries.stream()
-                .filter(nodelistEntryDto -> nodelistEntryDto.number() == zone)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Zone not found"))
-                .children().stream()
-                .filter(nodelistEntryDto -> nodelistEntryDto.number() == network)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Network not found"))
-                .children().stream()
-                .filter(nodelistEntryDto -> nodelistEntryDto.number() == node)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Node not found"));
+        return getNodelistEntry(zone, network, node);
     }
 
     /**
