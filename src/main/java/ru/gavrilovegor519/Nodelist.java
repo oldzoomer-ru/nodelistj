@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
  */
 public class Nodelist {
 
-    private final List<NodelistEntryDto> nodelistEntries = new ArrayList<>();
+    private final Map<Integer, NodelistEntryDto> nodelistEntries = new HashMap<>();
 
     /**
      * Nodelist constructor with path to nodelist
@@ -51,11 +51,11 @@ public class Nodelist {
 
     /**
      * Get all data from nodelist
-     * @return {@link List} of {@link NodelistEntryDto} with data from the nodelist
+     * @return {@link Map} of {@link NodelistEntryDto} with data from the nodelist
      * *
      * @see NodelistEntryDto
      */
-    public List<NodelistEntryDto> getNodelistEntries() {
+    public Map<Integer, NodelistEntryDto> getNodelistEntries() {
         return nodelistEntries;
     }
 
@@ -83,23 +83,20 @@ public class Nodelist {
         return getNodelistEntry(zone, network, node);
     }
 
+    /**
+     * Returns {@link NodelistEntryDto} by address
+     *
+     * @param zone zone number
+     * @param network network number
+     * @param node node number
+     * @return {@link NodelistEntryDto} with data from the nodelist
+     */
     public NodelistEntryDto getNodelistEntry(int zone, int network, int node) {
         if (zone < 1 || network < 1 || node < 0) {
             throw new IllegalArgumentException("Zone, network or node is not valid");
         }
 
-        return nodelistEntries.stream()
-                .filter(nodelistEntryDto -> nodelistEntryDto.number() == zone)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Zone not found"))
-                .children().stream()
-                .filter(nodelistEntryDto -> nodelistEntryDto.number() == network)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Network not found"))
-                .children().stream()
-                .filter(nodelistEntryDto -> nodelistEntryDto.number() == node)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Node not found"));
+        return nodelistEntries.get(zone).children().get(network).children().get(node);
     }
 
     /**
@@ -110,14 +107,7 @@ public class Nodelist {
      * @return list of nodes from the specified network
      */
     public NodelistEntryDto getNetworkNodelistEntries(int zone, int network) {
-        return nodelistEntries.stream()
-                .filter(nodelistEntryDto -> nodelistEntryDto.number() == zone)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Zone not found"))
-                .children().stream()
-                .filter(nodelistEntryDto -> nodelistEntryDto.number() == network)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Network not found"));
+        return nodelistEntries.get(zone).children().get(network);
     }
 
     /**
@@ -127,10 +117,7 @@ public class Nodelist {
      * @return list of nodes from the specified zone
      */
     public NodelistEntryDto getZoneNodelistEntries(int zone) {
-        return nodelistEntries.stream()
-                .filter(nodelistEntryDto -> nodelistEntryDto.number() == zone)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Zone not found"));
+        return nodelistEntries.get(zone);
     }
 
     /**
@@ -142,27 +129,36 @@ public class Nodelist {
         try (InputStreamReader reader = new InputStreamReader(streamReader);
                 BufferedReader bufferedReader = new BufferedReader(reader)) {
             CurrentNodelistTree currentNodelistTree = null;
+            int currentZone = 0;
+            int currentNetwork = 0;
 
             while (bufferedReader.ready()) {
                 String line = bufferedReader.readLine();
 
                 if (!line.startsWith(";") || !line.isBlank()) {
-                    if (line.startsWith(",")) line = "###" + line; // Fixes an issue with the empty keyword at the beginning of the nodelist
+                    // Fixes an issue with the empty keyword at the beginning of the nodelist
+                    if (line.startsWith(",")) line = "###" + line;
 
                     String[] splitLine = line.split(",");
 
                     if (splitLine.length >= 7) {
                         if (Keywords.fromString(splitLine[0]) == Keywords.ZONE) {
-                            nodelistEntries.add(generateNodelistEntry(splitLine));
+                            nodelistEntries.put(Integer.valueOf(splitLine[1]), generateNodelistEntry(splitLine));
                             currentNodelistTree = CurrentNodelistTree.ZONE;
-                        } else if (Keywords.fromString(splitLine[0]) == Keywords.HOST || Keywords.fromString(splitLine[0]) == Keywords.REGION) {
-                            nodelistEntries.getLast().children().add(generateNodelistEntry(splitLine));
+                            currentZone = Integer.parseInt(splitLine[1]);
+                        } else if (Keywords.fromString(splitLine[0]) == Keywords.HOST ||
+                                Keywords.fromString(splitLine[0]) == Keywords.REGION) {
+                            nodelistEntries.get(currentZone).children()
+                                    .put(Integer.valueOf(splitLine[1]), generateNodelistEntry(splitLine));
                             currentNodelistTree = CurrentNodelistTree.NETWORK;
+                            currentNetwork = Integer.parseInt(splitLine[1]);
                         } else {
                             if (currentNodelistTree == CurrentNodelistTree.ZONE) {
-                                nodelistEntries.getLast().children().add(generateNodelistEntry(splitLine));
+                                nodelistEntries.get(currentZone).children()
+                                        .put(Integer.valueOf(splitLine[1]), generateNodelistEntry(splitLine));
                             } else if (currentNodelistTree == CurrentNodelistTree.NETWORK) {
-                                nodelistEntries.getLast().children().getLast().children().add(generateNodelistEntry(splitLine));
+                                nodelistEntries.get(currentZone).children().get(currentNetwork).children()
+                                        .put(Integer.valueOf(splitLine[1]), generateNodelistEntry(splitLine));
                             }
                         }
                     }
@@ -180,10 +176,9 @@ public class Nodelist {
      * @return {@link NodelistEntryDto} with data from the line
      */
     private NodelistEntryDto generateNodelistEntry(String[] splitLine) {
-        return new NodelistEntryDto(Keywords.fromString(splitLine[0]),
-                Integer.parseInt(splitLine[1]), splitLine[2], splitLine[3],
+        return new NodelistEntryDto(Keywords.fromString(splitLine[0]), splitLine[2], splitLine[3],
                 splitLine[4], splitLine[5], Integer.parseInt(splitLine[6]),
-                Arrays.copyOfRange(splitLine, 7, splitLine.length), new ArrayList<>());
+                Arrays.copyOfRange(splitLine, 7, splitLine.length), new HashMap<>());
     }
 
 }
