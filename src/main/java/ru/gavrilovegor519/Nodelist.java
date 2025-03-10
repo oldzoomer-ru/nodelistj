@@ -140,8 +140,7 @@ public class Nodelist {
      * @param streamReader {@link InputStream} of the nodelist
      */
     private void indexNodelist(InputStream streamReader) {
-        try (InputStreamReader reader = new InputStreamReader(streamReader);
-                BufferedReader bufferedReader = new BufferedReader(reader)) {
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(streamReader))) {
             CurrentNodelistTree currentNodelistTree = null;
             int currentZone = 0;
             int currentNetwork = 0;
