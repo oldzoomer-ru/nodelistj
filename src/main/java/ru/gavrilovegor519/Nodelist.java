@@ -92,11 +92,13 @@ public class Nodelist {
      * @return {@link NodelistEntryDto} with data from the nodelist
      */
     public NodelistEntryDto getNodelistEntry(int zone, int network, int node) {
-        if (zone < 1 || network < 1 || node < 0) {
-            throw new IllegalArgumentException("Zone, network or node is not valid");
+        NodelistEntryDto networkNodelistEntries = getNetworkNodelistEntries(zone, network);
+
+        if (networkNodelistEntries.children().get(node) == null) {
+            throw new IllegalArgumentException("Node is not valid");
         }
 
-        return nodelistEntries.get(zone).children().get(network).children().get(node);
+        return networkNodelistEntries.children().get(node);
     }
 
     /**
@@ -107,7 +109,13 @@ public class Nodelist {
      * @return list of nodes from the specified network
      */
     public NodelistEntryDto getNetworkNodelistEntries(int zone, int network) {
-        return nodelistEntries.get(zone).children().get(network);
+        NodelistEntryDto zoneNodelistEntries = getZoneNodelistEntries(zone);
+
+        if (zoneNodelistEntries.children().get(network) == null) {
+            throw new IllegalArgumentException("Network is not valid");
+        }
+
+        return zoneNodelistEntries.children().get(network);
     }
 
     /**
@@ -117,7 +125,13 @@ public class Nodelist {
      * @return list of nodes from the specified zone
      */
     public NodelistEntryDto getZoneNodelistEntries(int zone) {
-        return nodelistEntries.get(zone);
+        NodelistEntryDto nodelistEntryDto = nodelistEntries.get(zone);
+
+        if (nodelistEntryDto == null) {
+            throw new IllegalArgumentException("Zone is not valid");
+        }
+
+        return nodelistEntryDto;
     }
 
     /**

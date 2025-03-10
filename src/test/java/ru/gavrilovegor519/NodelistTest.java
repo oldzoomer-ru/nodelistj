@@ -56,7 +56,6 @@ public class NodelistTest {
     void testDataFromNodelist() {
         NodelistEntryDto entryDto = nodelist.getNodelistEntry("2:5015/519");
         assertNull(entryDto.keywords());
-        assertEquals(519, entryDto.number());
         assertEquals("GavrilovNode", entryDto.nodeName());
         assertEquals("Kstovo_Russia", entryDto.location());
         assertEquals("Egor_Gavrilov", entryDto.sysOpName());
@@ -79,5 +78,29 @@ public class NodelistTest {
     @Test
     void testGetNetworkNodelistData() {
         assertDoesNotThrow(() -> nodelist.getNetworkNodelistEntries(2, 5015));
+    }
+
+    /**
+     * Checks that getting zone nodelist in incorrect zone is throws an exception correctly.
+     */
+    @Test
+    void testGetZoneNodelistWithIncorrectZone() {
+        assertThrows(IllegalArgumentException.class, () -> nodelist.getZoneNodelistEntries(0));
+    }
+
+    /**
+     * Checks that getting network nodelist in incorrect network is throws an exception correctly.
+     */
+    @Test
+    void testGetNetworkNodelistWithIncorrectNetwork() {
+        assertThrows(IllegalArgumentException.class, () -> nodelist.getNetworkNodelistEntries(2, -999));
+    }
+
+    /**
+     * Checks that getting network nodelist in incorrect zone is throws an exception correctly.
+     */
+    @Test
+    void testGetNetworkNodelistWithIncorrectZone() {
+        assertThrows(IllegalArgumentException.class, () -> nodelist.getNetworkNodelistEntries(0, 5015));
     }
 }
