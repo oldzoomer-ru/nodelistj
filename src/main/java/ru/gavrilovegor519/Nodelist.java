@@ -10,7 +10,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,6 +41,10 @@ public class Nodelist {
         } catch (IOException e) {
             throw new IllegalArgumentException("Cannot read file", e);
         }
+    }
+
+    public Nodelist(Map<Integer, NodelistEntryDto> entries) {
+        nodelistEntries.putAll(entries);
     }
 
     /**
