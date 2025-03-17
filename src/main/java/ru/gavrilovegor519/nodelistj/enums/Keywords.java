@@ -1,4 +1,4 @@
-package ru.gavrilovegor519.enums;
+package ru.gavrilovegor519.nodelistj.enums;
 
 /**
  * Fidonet nodelist keywords
