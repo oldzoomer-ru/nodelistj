@@ -107,7 +107,7 @@ public class NodelistMap {
             throw new IllegalArgumentException("Node not found");
         }
 
-        return getNetworkNodelistEntries(zone, network).children().get(node);
+        return nodelistEntries.get(zone).children().get(network).children().get(node);
     }
 
     /**
@@ -128,7 +128,7 @@ public class NodelistMap {
             throw new IllegalArgumentException("Network not found");
         }
 
-        return getZoneNodelistEntries(zone).children().get(network);
+        return nodelistEntries.get(zone).children().get(network);
     }
 
     /**

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import ru.gavrilovegor519.nodelistj.entries.NodelistEntryMap;
 
-public class NodelistTest {
+public class NodelistMapTest {
 
     private static NodelistMap nodelist;
 
@@ -22,7 +22,7 @@ public class NodelistTest {
      */
     @BeforeAll
     static void setUp() throws URISyntaxException {
-        Path path = Paths.get(Objects.requireNonNull(NodelistTest.class.getResource("/nodelist.txt")).toURI());
+        Path path = Paths.get(Objects.requireNonNull(NodelistMapTest.class.getResource("/nodelist.txt")).toURI());
         nodelist = new NodelistMap(path);
     }
 
