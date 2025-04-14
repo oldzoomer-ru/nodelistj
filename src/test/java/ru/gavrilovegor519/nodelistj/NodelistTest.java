@@ -1,20 +1,20 @@
 package ru.gavrilovegor519.nodelistj;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import ru.gavrilovegor519.nodelistj.entries.NodelistEntry;
-import ru.gavrilovegor519.nodelistj.enums.Keywords;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import ru.gavrilovegor519.nodelistj.entries.NodelistEntryMap;
 
 public class NodelistTest {
 
-    private static Nodelist nodelist;
+    private static NodelistMap nodelist;
 
     /**
      * Initializes nodelist object with correct path to nodelist.txt file.
@@ -23,7 +23,7 @@ public class NodelistTest {
     @BeforeAll
     static void setUp() throws URISyntaxException {
         Path path = Paths.get(Objects.requireNonNull(NodelistTest.class.getResource("/nodelist.txt")).toURI());
-        nodelist = new Nodelist(path);
+        nodelist = new NodelistMap(path);
     }
 
     /**
@@ -31,7 +31,7 @@ public class NodelistTest {
      */
     @Test
     void testGetNodelistEntryWithNullAddress() {
-        assertThrows(IllegalArgumentException.class, () -> nodelist.getNodelistEntry(null));
+        assertThrows(IllegalArgumentException.class, () -> nodelist.getNodelistEntryMap(null));
     }
 
     /**
@@ -39,7 +39,7 @@ public class NodelistTest {
      */
     @Test
     void testGetNodelistEntryWithIncorrectAddressFormat() {
-        assertThrows(IllegalArgumentException.class, () -> nodelist.getNodelistEntry("incorrectAddress"));
+        assertThrows(IllegalArgumentException.class, () -> nodelist.getNodelistEntryMap("incorrectAddress"));
     }
 
     /**
@@ -47,7 +47,7 @@ public class NodelistTest {
      */
     @Test
     void testGetNodelistEntryWithCorrectAddress() {
-        assertDoesNotThrow(() -> nodelist.getNodelistEntry("2:5015/519"));
+        assertDoesNotThrow(() -> nodelist.getNodelistEntryMap("2:5015/519"));
     }
 
     /**
@@ -55,10 +55,7 @@ public class NodelistTest {
      */
     @Test
     void testDataFromNodelist() {
-        NodelistEntry entryDto = nodelist.getNodelistEntry("2:5015/519");
-        assertEquals(2, entryDto.zone());
-        assertEquals(5015, entryDto.network());
-        assertEquals(519, entryDto.node());
+        NodelistEntryMap entryDto = nodelist.getNodelistEntryMap("2:5015/519");
         assertNull(entryDto.keywords());
         assertEquals("GavrilovNode", entryDto.nodeName());
         assertEquals("Kstovo_Russia", entryDto.location());
@@ -69,48 +66,11 @@ public class NodelistTest {
     }
 
     /**
-     * Checks that nodelist object is working correctly.
-     */
-    @Test
-    void testDataFromNodelist2() {
-        NodelistEntry entryDto = nodelist.getNodelistEntry("2:2/0");
-        assertEquals(2, entryDto.zone());
-        assertEquals(2, entryDto.network());
-        assertEquals(0, entryDto.node());
-        System.out.println(entryDto);
-    }
-
-    /**
-     * Checks that nodelist object is working correctly.
-     */
-    @Test
-    void testDataFromNodelist3() {
-        NodelistEntry entryDto = nodelist.getNodelistEntry("2:2/2");
-        assertEquals(2, entryDto.zone());
-        assertEquals(2, entryDto.network());
-        assertEquals(2, entryDto.node());
-        System.out.println(entryDto);
-    }
-
-    /**
-     * Checks that nodelist object is working correctly.
-     */
-    @Test
-    void testDataFromNodelist4() {
-        NodelistEntry entryDto = nodelist.getNodelistEntry("1:1/0");
-        assertEquals(1, entryDto.zone());
-        assertEquals(1, entryDto.network());
-        assertEquals(0, entryDto.node());
-        assertEquals(Keywords.ZONE, entryDto.keywords());
-        System.out.println(entryDto);
-    }
-
-    /**
      * Checks that getting zone nodelist data is working correctly.
      */
     @Test
     void testGetZoneNodelistData() {
-        assertDoesNotThrow(() -> nodelist.getNodelistEntries(2));
+        assertDoesNotThrow(() -> nodelist.getZoneNodelistEntries(2));
     }
 
     /**
@@ -118,7 +78,7 @@ public class NodelistTest {
      */
     @Test
     void testGetNetworkNodelistData() {
-        assertDoesNotThrow(() -> nodelist.getNodelistEntries(2, 5015));
+        assertDoesNotThrow(() -> nodelist.getNetworkNodelistEntries(2, 5015));
     }
 
     /**
@@ -126,7 +86,7 @@ public class NodelistTest {
      */
     @Test
     void testGetZoneNodelistWithIncorrectZone() {
-        assertThrows(IllegalArgumentException.class, () -> nodelist.getNodelistEntries(0));
+        assertThrows(IllegalArgumentException.class, () -> nodelist.getZoneNodelistEntries(0));
     }
 
     /**
@@ -134,7 +94,7 @@ public class NodelistTest {
      */
     @Test
     void testGetNetworkNodelistWithIncorrectNetwork() {
-        assertThrows(IllegalArgumentException.class, () -> nodelist.getNodelistEntries(2, -999));
+        assertThrows(IllegalArgumentException.class, () -> nodelist.getNetworkNodelistEntries(2, -999));
     }
 
     /**
@@ -142,6 +102,6 @@ public class NodelistTest {
      */
     @Test
     void testGetNetworkNodelistWithIncorrectZone() {
-        assertThrows(IllegalArgumentException.class, () -> nodelist.getNodelistEntries(0, 5015));
+        assertThrows(IllegalArgumentException.class, () -> nodelist.getNetworkNodelistEntries(0, 5015));
     }
 }
