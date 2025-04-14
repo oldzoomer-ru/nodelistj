@@ -1,9 +1,5 @@
 package ru.gavrilovegor519.nodelistj;
 
-import ru.gavrilovegor519.nodelistj.entries.NodelistEntry;
-import ru.gavrilovegor519.nodelistj.enums.CurrentNodelistTree;
-import ru.gavrilovegor519.nodelistj.enums.Keywords;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,9 +9,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import ru.gavrilovegor519.nodelistj.entries.NodelistEntry;
+import ru.gavrilovegor519.nodelistj.enums.CurrentNodelistTree;
+import ru.gavrilovegor519.nodelistj.enums.Keywords;
 
 /**
  * Fidonet Nodelist parser
@@ -63,97 +60,6 @@ public class Nodelist {
      */
     public List<NodelistEntry> getNodelist() {
         return nodelistRoot;
-    }
-
-    /**
-     * Returns {@link NodelistEntry} by address
-     *
-     * @param address address of the node
-     * @return {@link NodelistEntry} with data from the nodelist
-     */
-    public NodelistEntry getNodelistEntry(String address) {
-        if (address == null) {
-            throw new IllegalArgumentException("Address is null");
-        }
-
-        Matcher matcher = Pattern.compile("^([0-9]+):([0-9]+)/([0-9]+)$").matcher(address);
-
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("Incorrect address format");
-        }
-
-        int zone = Integer.parseInt(matcher.group(1));
-        int network = Integer.parseInt(matcher.group(2));
-        int node = Integer.parseInt(matcher.group(3));
-
-        return getNodelistEntry(zone, network, node);
-    }
-
-    /**
-     * Returns {@link NodelistEntry} by address
-     *
-     * @param zone zone number
-     * @param network network number
-     * @param node node number
-     * @return {@link NodelistEntry} with data from the nodelist
-     */
-    public NodelistEntry getNodelistEntry(Integer zone, Integer network, Integer node) {
-        if (zone == null || network == null || node == null) {
-            throw new IllegalArgumentException("Zone, network or node is null");
-        }
-
-        if (zone <= 0 || network < 0 || node < 0) {
-            throw new IllegalArgumentException("Zone cannot be equal to zero or less than zero. Network and node cannot be less than zero");
-        }
-
-        for (NodelistEntry entry : nodelistRoot) {
-            if (Objects.equals(entry.zone(), zone)
-                    && Objects.equals(entry.network(), network)
-                    && Objects.equals(entry.node(), node)) {
-                return entry;
-            }
-        }
-
-        return null;
-    }
-
-    public List<NodelistEntry> getNodelistEntries(Integer zone) {
-        if (zone == null) {
-            throw new IllegalArgumentException("Zone is null");
-        }
-
-        if (zone <= 0) {
-            throw new IllegalArgumentException("Zone cannot be equal to zero");
-        }
-
-        List<NodelistEntry> nodeListEntries = new ArrayList<>();
-        for (NodelistEntry entry : nodelistRoot) {
-            if (Objects.equals(entry.zone(), zone)) {
-                nodeListEntries.add(entry);
-            }
-        }
-
-        return nodeListEntries;
-    }
-
-    public List<NodelistEntry> getNodelistEntries(Integer zone, Integer network) {
-        if (zone == null || network == null) {
-            throw new IllegalArgumentException("Zone or network is null");
-        }
-
-        if (zone <= 0 || network <= 0) {
-            throw new IllegalArgumentException("Zone or network cannot be equal to zero");
-        }
-
-        List<NodelistEntry> nodeListEntries = new ArrayList<>();
-        for (NodelistEntry entry : nodelistRoot) {
-            if (Objects.equals(entry.zone(), zone)
-                    && Objects.equals(entry.network(), network)) {
-                nodeListEntries.add(entry);
-            }
-        }
-
-        return nodeListEntries;
     }
 
     /**
