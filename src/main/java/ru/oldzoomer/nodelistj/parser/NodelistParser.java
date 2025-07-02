@@ -69,9 +69,6 @@ public class NodelistParser {
         }
         
         Keywords keyword = Keywords.fromString(fields[0]);
-        if (keyword == null && !fields[0].equals(EMPTY_KEYWORD_FIX)) {
-            return null;
-        }
         
         return createNodelistEntry(fields, keyword, context);
     }
@@ -130,31 +127,26 @@ public class NodelistParser {
      * Update parsing context based on current entry
      */
     private static void updateContext(ParsingContext context, Keywords keyword, Integer nodeNumber) {
-        switch (keyword) {
-            case ZONE -> {
-                context.setCurrentZone(nodeNumber);
-                context.setCurrentNetwork(nodeNumber);
-                context.setCurrentTree(ParsingContext.TreeLevel.ZONE);
-            }
-            case HOST, REGION -> {
-                context.setCurrentNetwork(nodeNumber);
-                context.setCurrentTree(ParsingContext.TreeLevel.NETWORK);
-            }
-            default -> {
-                // Regular node entry - no context update needed
-            }
+        if (keyword == Keywords.ZONE) {
+            context.setCurrentZone(nodeNumber);
+            context.setCurrentNetwork(nodeNumber);
+            context.setCurrentTree(ParsingContext.TreeLevel.ZONE);
+        } else if (keyword == Keywords.HOST || keyword == Keywords.REGION) {
+            context.setCurrentNetwork(nodeNumber);
+            context.setCurrentTree(ParsingContext.TreeLevel.NETWORK);
         }
+        // For regular nodes (null keyword), don't change context
     }
     
     /**
      * Determine the node number based on keyword and context
      */
     private static Integer determineNodeNumber(Keywords keyword, Integer nodeNumber, ParsingContext context) {
-        return switch (keyword) {
-            case ZONE -> 0;
-            case HOST, REGION -> 0;
-            default -> nodeNumber;
-        };
+        if (keyword == Keywords.ZONE || keyword == Keywords.HOST || keyword == Keywords.REGION) {
+            return 0;
+        }
+        // For regular nodes and other keywords, use the actual node number
+        return nodeNumber;
     }
     
     /**

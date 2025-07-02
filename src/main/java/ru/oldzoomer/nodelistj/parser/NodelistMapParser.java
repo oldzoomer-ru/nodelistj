@@ -67,9 +67,6 @@ public class NodelistMapParser {
         }
         
         Keywords keyword = Keywords.fromString(fields[0]);
-        if (keyword == null && !fields[0].equals(EMPTY_KEYWORD_FIX)) {
-            return;
-        }
         
         try {
             Integer nodeNumber = parseInteger(fields[1]);
@@ -91,31 +88,30 @@ public class NodelistMapParser {
     private static void insertIntoMap(Map<Integer, NodelistEntryMap> nodelistEntries, 
                                      NodelistEntryMap entry, Keywords keyword, 
                                      Integer nodeNumber, MapParsingContext context) {
-        switch (keyword) {
-            case ZONE -> {
-                nodelistEntries.put(nodeNumber, entry);
-                context.setCurrentZone(nodeNumber);
-                context.setCurrentTree(MapParsingContext.TreeLevel.ZONE);
+        if (keyword == Keywords.ZONE) {
+            nodelistEntries.put(nodeNumber, entry);
+            context.setCurrentZone(nodeNumber);
+            context.setCurrentTree(MapParsingContext.TreeLevel.ZONE);
+        } else if (keyword == Keywords.HOST || keyword == Keywords.REGION) {
+            if (context.getCurrentZone() != null && nodelistEntries.containsKey(context.getCurrentZone())) {
+                nodelistEntries.get(context.getCurrentZone()).children().put(nodeNumber, entry);
+                context.setCurrentNetwork(nodeNumber);
+                context.setCurrentTree(MapParsingContext.TreeLevel.NETWORK);
             }
-            case HOST, REGION -> {
-                if (context.getCurrentZone() != null && nodelistEntries.containsKey(context.getCurrentZone())) {
+        } else {
+            // Regular node entry (keyword is null or other types)
+            if (context.getCurrentZone() != null && nodelistEntries.containsKey(context.getCurrentZone())) {
+                if (context.getCurrentTree() == MapParsingContext.TreeLevel.ZONE) {
+                    // Direct child of zone
                     nodelistEntries.get(context.getCurrentZone()).children().put(nodeNumber, entry);
-                    context.setCurrentNetwork(nodeNumber);
-                    context.setCurrentTree(MapParsingContext.TreeLevel.NETWORK);
-                }
-            }
-            default -> {
-                if (context.getCurrentZone() != null && nodelistEntries.containsKey(context.getCurrentZone())) {
-                    if (context.getCurrentTree() == MapParsingContext.TreeLevel.ZONE) {
-                        nodelistEntries.get(context.getCurrentZone()).children().put(nodeNumber, entry);
-                    } else if (context.getCurrentTree() == MapParsingContext.TreeLevel.NETWORK && 
-                              context.getCurrentNetwork() != null) {
-                        NodelistEntryMap networkEntry = nodelistEntries.get(context.getCurrentZone())
-                                                                      .children()
-                                                                      .get(context.getCurrentNetwork());
-                        if (networkEntry != null) {
-                            networkEntry.children().put(nodeNumber, entry);
-                        }
+                } else if (context.getCurrentTree() == MapParsingContext.TreeLevel.NETWORK && 
+                          context.getCurrentNetwork() != null) {
+                    // Child of network
+                    NodelistEntryMap networkEntry = nodelistEntries.get(context.getCurrentZone())
+                                                                  .children()
+                                                                  .get(context.getCurrentNetwork());
+                    if (networkEntry != null) {
+                        networkEntry.children().put(nodeNumber, entry);
                     }
                 }
             }
