@@ -1,27 +1,23 @@
 package ru.oldzoomer.nodelistj;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ru.oldzoomer.nodelistj.entries.NodelistEntryMap;
-import ru.oldzoomer.nodelistj.enums.CurrentNodelistTree;
-import ru.oldzoomer.nodelistj.enums.Keywords;
+import ru.oldzoomer.nodelistj.parser.NodelistMapParser;
 
 /**
- * Fidonet Nodelist parser
+ * Optimized Fidonet Nodelist map parser with improved performance
  */
 public class NodelistMap {
 
-    private final Map<Integer, NodelistEntryMap> nodelistEntries = new HashMap<>();
+    private static final Pattern ADDRESS_PATTERN = Pattern.compile("^([0-9]+):([0-9]+)/([0-9]+)$");
+    private final Map<Integer, NodelistEntryMap> nodelistEntries;
 
     /**
      * Nodelist constructor with path to nodelist
@@ -36,8 +32,8 @@ public class NodelistMap {
             throw new IllegalArgumentException("File does not exist");
         }
 
-        try {
-            indexNodelist(Files.newInputStream(path));
+        try (InputStream inputStream = Files.newInputStream(path)) {
+            nodelistEntries = NodelistMapParser.parseNodelistMap(inputStream);
         } catch (IOException e) {
             throw new IllegalArgumentException("Cannot read file", e);
         }
@@ -48,13 +44,21 @@ public class NodelistMap {
      * @param inputStream input stream
      */
     public NodelistMap(InputStream inputStream) {
-        indexNodelist(inputStream);
+        if (inputStream == null) {
+            throw new IllegalArgumentException("Input stream cannot be null");
+        }
+        
+        try {
+            nodelistEntries = NodelistMapParser.parseNodelistMap(inputStream);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to parse nodelist", e);
+        }
     }
 
     /**
      * Get all data from nodelist
      * @return {@link Map} of {@link NodelistEntryMap} with data from the nodelist
-     * *
+     * 
      * @see NodelistEntryMap
      */
     public Map<Integer, NodelistEntryMap> getNodelistEntries() {
@@ -62,9 +66,9 @@ public class NodelistMap {
     }
 
     /**
-     * Returns {@link NodelistEntryMap} by address
+     * Returns {@link NodelistEntryMap} by address string
      *
-     * @param address address of the node
+     * @param address address of the node in format "zone:network/node"
      * @return {@link NodelistEntryMap} with data from the nodelist
      */
     public NodelistEntryMap getNodelistEntryMap(String address) {
@@ -72,10 +76,9 @@ public class NodelistMap {
             throw new IllegalArgumentException("Address is null");
         }
 
-        Matcher matcher = Pattern.compile("^([0-9]+):([0-9]+)/([0-9]+)$").matcher(address);
-
+        Matcher matcher = ADDRESS_PATTERN.matcher(address);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("Incorrect address format");
+            throw new IllegalArgumentException("Incorrect address format. Expected format: zone:network/node");
         }
 
         int zone = Integer.parseInt(matcher.group(1));
@@ -86,7 +89,7 @@ public class NodelistMap {
     }
 
     /**
-     * Returns {@link NodelistEntryMap} by address
+     * Returns {@link NodelistEntryMap} by address components
      *
      * @param zone zone number
      * @param network network number
@@ -94,20 +97,24 @@ public class NodelistMap {
      * @return {@link NodelistEntryMap} with data from the nodelist
      */
     public NodelistEntryMap getNodelistEntryMap(int zone, int network, int node) {
-        if (zone < 1 || network < 1 || node < 0) {
-            throw new IllegalArgumentException("Zone, network or node is not valid");
+        validateAddress(zone, network, node);
+        
+        NodelistEntryMap zoneEntry = nodelistEntries.get(zone);
+        if (zoneEntry == null) {
+            throw new IllegalArgumentException("Zone " + zone + " not found");
         }
-        if (!nodelistEntries.containsKey(zone)) {
-            throw new IllegalArgumentException("Zone not found");
+        
+        NodelistEntryMap networkEntry = zoneEntry.children().get(network);
+        if (networkEntry == null) {
+            throw new IllegalArgumentException("Network " + network + " not found in zone " + zone);
         }
-        if (!nodelistEntries.get(zone).children().containsKey(network)) {
-            throw new IllegalArgumentException("Network not found");
-        }
-        if (!nodelistEntries.get(zone).children().get(network).children().containsKey(node)) {
-            throw new IllegalArgumentException("Node not found");
+        
+        NodelistEntryMap nodeEntry = networkEntry.children().get(node);
+        if (nodeEntry == null) {
+            throw new IllegalArgumentException("Node " + node + " not found in network " + zone + ":" + network);
         }
 
-        return nodelistEntries.get(zone).children().get(network).children().get(node);
+        return nodeEntry;
     }
 
     /**
@@ -119,16 +126,20 @@ public class NodelistMap {
      */
     public NodelistEntryMap getNetworkNodelistEntries(int zone, int network) {
         if (zone < 1 || network < 1) {
-            throw new IllegalArgumentException("Zone or network is not valid");
+            throw new IllegalArgumentException("Zone and network must be positive numbers");
         }
-        if (!nodelistEntries.containsKey(zone)) {
-            throw new IllegalArgumentException("Zone not found");
+        
+        NodelistEntryMap zoneEntry = nodelistEntries.get(zone);
+        if (zoneEntry == null) {
+            throw new IllegalArgumentException("Zone " + zone + " not found");
         }
-        if (!nodelistEntries.get(zone).children().containsKey(network)) {
-            throw new IllegalArgumentException("Network not found");
+        
+        NodelistEntryMap networkEntry = zoneEntry.children().get(network);
+        if (networkEntry == null) {
+            throw new IllegalArgumentException("Network " + network + " not found in zone " + zone);
         }
 
-        return nodelistEntries.get(zone).children().get(network);
+        return networkEntry;
     }
 
     /**
@@ -139,74 +150,29 @@ public class NodelistMap {
      */
     public NodelistEntryMap getZoneNodelistEntries(int zone) {
         if (zone < 1) {
-            throw new IllegalArgumentException("Zone is not valid");
+            throw new IllegalArgumentException("Zone must be a positive number");
         }
-        if (!nodelistEntries.containsKey(zone)) {
-            throw new IllegalArgumentException("Zone not found");
+        
+        NodelistEntryMap zoneEntry = nodelistEntries.get(zone);
+        if (zoneEntry == null) {
+            throw new IllegalArgumentException("Zone " + zone + " not found");
         }
 
-        return nodelistEntries.get(zone);
+        return zoneEntry;
     }
-
+    
     /**
-     * Reads Fidonet nodelist and indexes it in memory
-     *
-     * @param streamReader {@link InputStream} of the nodelist
+     * Validate address components
      */
-    private void indexNodelist(InputStream streamReader) {
-        try (InputStreamReader reader = new InputStreamReader(streamReader);
-                BufferedReader bufferedReader = new BufferedReader(reader)) {
-            CurrentNodelistTree currentNodelistTree = null;
-            int currentZone = 0;
-            int currentNetwork = 0;
-
-            while (bufferedReader.ready()) {
-                String line = bufferedReader.readLine();
-
-                if (!line.startsWith(";") || !line.isBlank()) {
-                    // Fixes an issue with the empty keyword at the beginning of the nodelist
-                    if (line.startsWith(",")) line = "###" + line;
-
-                    String[] splitLine = line.split(",");
-
-                    if (splitLine.length >= 7) {
-                        if (Keywords.fromString(splitLine[0]) == Keywords.ZONE) {
-                            nodelistEntries.put(Integer.valueOf(splitLine[1]), generateNodelistEntryMap(splitLine));
-                            currentNodelistTree = CurrentNodelistTree.ZONE;
-                            currentZone = Integer.parseInt(splitLine[1]);
-                        } else if (Keywords.fromString(splitLine[0]) == Keywords.HOST ||
-                                Keywords.fromString(splitLine[0]) == Keywords.REGION) {
-                            nodelistEntries.get(currentZone).children()
-                                    .put(Integer.valueOf(splitLine[1]), generateNodelistEntryMap(splitLine));
-                            currentNodelistTree = CurrentNodelistTree.NETWORK;
-                            currentNetwork = Integer.parseInt(splitLine[1]);
-                        } else {
-                            if (currentNodelistTree == CurrentNodelistTree.ZONE) {
-                                nodelistEntries.get(currentZone).children()
-                                        .put(Integer.valueOf(splitLine[1]), generateNodelistEntryMap(splitLine));
-                            } else if (currentNodelistTree == CurrentNodelistTree.NETWORK) {
-                                nodelistEntries.get(currentZone).children().get(currentNetwork).children()
-                                        .put(Integer.valueOf(splitLine[1]), generateNodelistEntryMap(splitLine));
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read nodelist", e);
+    private void validateAddress(int zone, int network, int node) {
+        if (zone < 1) {
+            throw new IllegalArgumentException("Zone must be a positive number");
+        }
+        if (network < 1) {
+            throw new IllegalArgumentException("Network must be a positive number");
+        }
+        if (node < 0) {
+            throw new IllegalArgumentException("Node must be a non-negative number");
         }
     }
-
-    /**
-     * Generates {@link NodelistEntryMap} from a line of the nodelist
-     *
-     * @param splitLine line of the nodelist
-     * @return {@link NodelistEntryMap} with data from the line
-     */
-    private NodelistEntryMap generateNodelistEntryMap(String[] splitLine) {
-        return new NodelistEntryMap(Keywords.fromString(splitLine[0]), splitLine[2], splitLine[3],
-                splitLine[4], splitLine[5], Integer.parseInt(splitLine[6]),
-                Arrays.copyOfRange(splitLine, 7, splitLine.length), new HashMap<>());
-    }
-
 }
