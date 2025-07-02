@@ -1,4 +1,4 @@
-package ru.gavrilovegor519.nodelistj;
+package ru.oldzoomer.nodelistj;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,9 +12,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ru.gavrilovegor519.nodelistj.entries.NodelistEntryMap;
-import ru.gavrilovegor519.nodelistj.enums.CurrentNodelistTree;
-import ru.gavrilovegor519.nodelistj.enums.Keywords;
+import ru.oldzoomer.nodelistj.entries.NodelistEntryMap;
+import ru.oldzoomer.nodelistj.enums.CurrentNodelistTree;
+import ru.oldzoomer.nodelistj.enums.Keywords;
 
 /**
  * Fidonet Nodelist parser

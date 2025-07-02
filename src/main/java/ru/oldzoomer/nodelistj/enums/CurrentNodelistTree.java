@@ -1,4 +1,4 @@
-package ru.gavrilovegor519.nodelistj.enums;
+package ru.oldzoomer.nodelistj.enums;
 
 /**
  * Fidonet nodelist tree state

@@ -1,6 +1,6 @@
-package ru.gavrilovegor519.nodelistj.entries;
+package ru.oldzoomer.nodelistj.entries;
 
-import ru.gavrilovegor519.nodelistj.enums.Keywords;
+import ru.oldzoomer.nodelistj.enums.Keywords;
 
 /**
  * Fidonet nodelist entry.

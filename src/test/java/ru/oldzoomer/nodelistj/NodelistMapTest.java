@@ -1,4 +1,4 @@
-package ru.gavrilovegor519.nodelistj;
+package ru.oldzoomer.nodelistj;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -10,7 +10,7 @@ import java.util.Objects;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import ru.gavrilovegor519.nodelistj.entries.NodelistEntryMap;
+import ru.oldzoomer.nodelistj.entries.NodelistEntryMap;
 
 public class NodelistMapTest {
 
