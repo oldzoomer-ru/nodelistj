@@ -1,8 +1,8 @@
 package ru.oldzoomer.nodelistj.entries;
 
-import java.util.Map;
-
 import ru.oldzoomer.nodelistj.enums.Keywords;
+
+import java.util.Map;
 
 /**
  * Fidonet nodelist entry.
@@ -14,7 +14,6 @@ import ru.oldzoomer.nodelistj.enums.Keywords;
  * @param phone     entry node phone number
  * @param baudRate  entry node baud rate
  * @param flags     entry node flags
- * @param map       entry node children
  */
 public record NodelistEntryMap(Keywords keywords, String nodeName, String location,
                             String sysOpName, String phone, Integer baudRate,
