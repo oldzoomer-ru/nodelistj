@@ -1,5 +1,8 @@
 package ru.oldzoomer.nodelistj;
 
+import ru.oldzoomer.nodelistj.entries.NodelistEntryMap;
+import ru.oldzoomer.nodelistj.parser.NodelistMapParser;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -8,15 +11,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ru.oldzoomer.nodelistj.entries.NodelistEntryMap;
-import ru.oldzoomer.nodelistj.parser.NodelistMapParser;
-
 /**
  * Optimized Fidonet Nodelist map parser with improved performance
  */
 public class NodelistMap {
 
-    private static final Pattern ADDRESS_PATTERN = Pattern.compile("^([0-9]+):([0-9]+)/([0-9]+)$");
+    private static final Pattern ADDRESS_PATTERN = Pattern.compile("^(\\d+):(\\d+)/(\\d+)$");
     private final Map<Integer, NodelistEntryMap> nodelistEntries;
 
     /**

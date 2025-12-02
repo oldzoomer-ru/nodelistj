@@ -1,18 +1,17 @@
 package ru.oldzoomer.nodelistj;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import ru.oldzoomer.nodelistj.entries.NodelistEntryMap;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
-import ru.oldzoomer.nodelistj.entries.NodelistEntryMap;
-
-public class NodelistMapTest {
+class NodelistMapTest {
 
     private static NodelistMap nodelist;
 

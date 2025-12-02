@@ -1,5 +1,8 @@
 package ru.oldzoomer.nodelistj.parser;
 
+import ru.oldzoomer.nodelistj.entries.NodelistEntryMap;
+import ru.oldzoomer.nodelistj.enums.Keywords;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,18 +11,18 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import ru.oldzoomer.nodelistj.entries.NodelistEntryMap;
-import ru.oldzoomer.nodelistj.enums.Keywords;
-
 /**
  * Optimized Fidonet nodelist map parser with improved performance
  */
 public class NodelistMapParser {
-    
+
     private static final int MIN_FIELDS_REQUIRED = 7;
     private static final String COMMENT_PREFIX = ";";
     private static final String EMPTY_KEYWORD_FIX = "###";
     private static final String FIELD_SEPARATOR = ",";
+
+    private NodelistMapParser() {
+    }
     
     /**
      * Parse nodelist into hierarchical map structure

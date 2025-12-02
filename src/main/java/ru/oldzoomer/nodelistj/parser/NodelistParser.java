@@ -1,5 +1,8 @@
 package ru.oldzoomer.nodelistj.parser;
 
+import ru.oldzoomer.nodelistj.entries.NodelistEntry;
+import ru.oldzoomer.nodelistj.enums.Keywords;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,9 +10,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import ru.oldzoomer.nodelistj.entries.NodelistEntry;
-import ru.oldzoomer.nodelistj.enums.Keywords;
 
 /**
  * Optimized Fidonet nodelist parser with improved performance and cleaner code structure
@@ -20,7 +20,10 @@ public class NodelistParser {
     private static final String COMMENT_PREFIX = ";";
     private static final String EMPTY_KEYWORD_FIX = "###";
     private static final String FIELD_SEPARATOR = ",";
-    
+
+    private NodelistParser() {
+    }
+
     /**
      * Parse nodelist from input stream with optimized algorithm
      * 
@@ -98,7 +101,7 @@ public class NodelistParser {
             
             Integer zone = context.getCurrentZone();
             Integer network = context.getCurrentNetwork();
-            Integer node = determineNodeNumber(keyword, nodeNumber, context);
+            Integer node = determineNodeNumber(keyword, nodeNumber);
             
             if (zone == null || network == null) {
                 return null;
@@ -141,7 +144,7 @@ public class NodelistParser {
     /**
      * Determine the node number based on keyword and context
      */
-    private static Integer determineNodeNumber(Keywords keyword, Integer nodeNumber, ParsingContext context) {
+    private static Integer determineNodeNumber(Keywords keyword, Integer nodeNumber) {
         if (keyword == Keywords.ZONE || keyword == Keywords.HOST || keyword == Keywords.REGION) {
             return 0;
         }
