@@ -4,11 +4,11 @@ plugins {
 }
 
 group = 'ru.oldzoomer'
-version = '1.0.2'
+version = '1.0.3'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
