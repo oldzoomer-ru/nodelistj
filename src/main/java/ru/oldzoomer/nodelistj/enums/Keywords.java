@@ -1,7 +1,11 @@
 package ru.oldzoomer.nodelistj.enums;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * Fidonet nodelist keywords
+ * Fidonet nodelist keywords.
  */
 public enum Keywords {
     ZONE("Zone"),
@@ -12,6 +16,16 @@ public enum Keywords {
     HOLD("Hold"),
     DOWN("Down");
 
+    private static final Map<String, Keywords> BY_KEYWORD;
+
+    static {
+        Map<String, Keywords> map = new HashMap<>();
+        for (Keywords k : values()) {
+            map.put(k.keyword, k);
+        }
+        BY_KEYWORD = Collections.unmodifiableMap(map);
+    }
+
     private final String keyword;
 
     Keywords(String keyword) {
@@ -19,22 +33,20 @@ public enum Keywords {
     }
 
     /**
-     * Get enum value by keyword
-     * @param keyword keyword
-     * @return Keywords enum value
+     * Returns the enum constant for the given keyword string, or {@code null}
+     * if no match is found. Lookup is O(1).
+     *
+     * @param keyword the keyword string (e.g. "Zone", "Host")
+     * @return the matching {@link Keywords} or {@code null}
      */
     public static Keywords fromString(String keyword) {
-        for (Keywords k : Keywords.values()) {
-            if (k.keyword.equals(keyword)) {
-                return k;
-            }
-        }
-        return null;
+        return BY_KEYWORD.get(keyword);
     }
 
     /**
-     * Get keyword value
-     * @return keyword value
+     * Returns the keyword string representation.
+     *
+     * @return the keyword string (e.g. "Zone", "Host")
      */
     @Override
     public String toString() {

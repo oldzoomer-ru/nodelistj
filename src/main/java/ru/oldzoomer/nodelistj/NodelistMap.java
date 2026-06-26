@@ -118,22 +118,21 @@ public class NodelistMap {
     }
 
     /**
-     * Get a map of nodes from the specified network
+     * Get a map of nodes from the specified network.
      *
-     * @param zone zone number
+     * @param zone    zone number
      * @param network network number
      * @return map of nodes from the specified network
      */
     public NodelistEntryMap getNetworkNodelistEntries(int zone, int network) {
-        if (zone < 1 || network < 1) {
-            throw new IllegalArgumentException("Zone and network must be positive numbers");
-        }
-        
+        validateZone(zone);
+        validateNetwork(network);
+
         NodelistEntryMap zoneEntry = nodelistEntries.get(zone);
         if (zoneEntry == null) {
             throw new IllegalArgumentException("Zone " + zone + " not found");
         }
-        
+
         NodelistEntryMap networkEntry = zoneEntry.children().get(network);
         if (networkEntry == null) {
             throw new IllegalArgumentException("Network " + network + " not found in zone " + zone);
@@ -143,16 +142,14 @@ public class NodelistMap {
     }
 
     /**
-     * Returns a map of nodes from the specified zone
+     * Returns a map of nodes from the specified zone.
      *
      * @param zone zone number
      * @return map of nodes from the specified zone
      */
     public NodelistEntryMap getZoneNodelistEntries(int zone) {
-        if (zone < 1) {
-            throw new IllegalArgumentException("Zone must be a positive number");
-        }
-        
+        validateZone(zone);
+
         NodelistEntryMap zoneEntry = nodelistEntries.get(zone);
         if (zoneEntry == null) {
             throw new IllegalArgumentException("Zone " + zone + " not found");
@@ -160,19 +157,30 @@ public class NodelistMap {
 
         return zoneEntry;
     }
-    
-    /**
-     * Validate address components
-     */
-    private void validateAddress(int zone, int network, int node) {
+
+    // ---- validation helpers ----
+
+    private void validateZone(int zone) {
         if (zone < 1) {
             throw new IllegalArgumentException("Zone must be a positive number");
         }
+    }
+
+    private void validateNetwork(int network) {
         if (network < 1) {
             throw new IllegalArgumentException("Network must be a positive number");
         }
+    }
+
+    private void validateNode(int node) {
         if (node < 0) {
             throw new IllegalArgumentException("Node must be a non-negative number");
         }
+    }
+
+    private void validateAddress(int zone, int network, int node) {
+        validateZone(zone);
+        validateNetwork(network);
+        validateNode(node);
     }
 }

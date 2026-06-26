@@ -22,7 +22,7 @@ import java.util.Objects;
 public record NodelistEntry(Integer zone, Integer network, Integer node,
                             Keywords keywords, String nodeName, String location,
                             String sysOpName, String phone, Integer baudRate,
-                            String[] flags) {
+                            String[] flags) implements BaseEntry {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof NodelistEntry(

@@ -19,7 +19,7 @@ import java.util.Objects;
  */
 public record NodelistEntryMap(Keywords keywords, String nodeName, String location,
                             String sysOpName, String phone, Integer baudRate,
-                            String[] flags, Map<Integer, NodelistEntryMap> children) {
+                            String[] flags, Map<Integer, NodelistEntryMap> children) implements BaseEntry {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof NodelistEntryMap(

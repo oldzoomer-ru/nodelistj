@@ -7,188 +7,110 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Optimized Fidonet nodelist map parser with improved performance
+ * Parses a Fidonet nodelist from an {@link InputStream} into a hierarchical map structure
+ * of {@link NodelistEntryMap} records.
+ *
+ * <p>Delegates shared parsing utilities to {@link ParserUtils} to avoid duplication
+ * with {@link NodelistParser}.</p>
  */
-public class NodelistMapParser {
-
-    private static final int MIN_FIELDS_REQUIRED = 7;
-    private static final String COMMENT_PREFIX = ";";
-    private static final String EMPTY_KEYWORD_FIX = "###";
-    private static final String FIELD_SEPARATOR = ",";
+public final class NodelistMapParser {
 
     private NodelistMapParser() {
     }
-    
+
     /**
-     * Parse nodelist into hierarchical map structure
-     * 
-     * @param inputStream input stream containing nodelist data
-     * @return map of zones containing networks and nodes
-     * @throws IOException if reading fails
+     * Parses a nodelist into a hierarchical map: zone → network → node.
+     *
+     * @param inputStream the source stream (not closed by this method; caller is responsible)
+     * @return map of zone numbers to their {@link NodelistEntryMap} entries
+     * @throws IOException if an I/O error occurs while reading
      */
     public static Map<Integer, NodelistEntryMap> parseNodelistMap(InputStream inputStream) throws IOException {
         Map<Integer, NodelistEntryMap> nodelistEntries = new HashMap<>();
-        
+
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            MapParsingContext context = new MapParsingContext();
+            ParserUtils.ParsingContext ctx = new ParserUtils.ParsingContext();
             String line;
-            
+
             while ((line = reader.readLine()) != null) {
-                if (shouldSkipLine(line)) {
+                if (ParserUtils.shouldSkipLine(line)) {
                     continue;
                 }
-                
-                processLineForMap(line, nodelistEntries, context);
+                processLine(line, nodelistEntries, ctx);
             }
         }
-        
+
         return nodelistEntries;
     }
-    
-    /**
-     * Check if line should be skipped during parsing
-     */
-    private static boolean shouldSkipLine(String line) {
-        return line.startsWith(COMMENT_PREFIX) || line.isBlank();
-    }
-    
-    /**
-     * Process a single line for map structure
-     */
-    private static void processLineForMap(String line, Map<Integer, NodelistEntryMap> nodelistEntries, 
-                                         MapParsingContext context) {
-        String processedLine = preprocessLine(line);
-        String[] fields = processedLine.split(FIELD_SEPARATOR, -1);
-        
-        if (fields.length < MIN_FIELDS_REQUIRED) {
+
+    private static void processLine(String line, Map<Integer, NodelistEntryMap> entries,
+                                    ParserUtils.ParsingContext ctx) {
+        String processed = ParserUtils.preprocessLine(line);
+        String[] fields = processed.split(ParserUtils.FIELD_SEPARATOR, -1);
+
+        if (fields.length < ParserUtils.MIN_FIELDS_REQUIRED) {
             return;
         }
-        
+
         Keywords keyword = Keywords.fromString(fields[0]);
-        
+
         try {
-            Integer nodeNumber = parseInteger(fields[1]);
+            Integer nodeNumber = ParserUtils.parseInteger(fields[1]);
             if (nodeNumber == null) {
                 return;
             }
-            
-            NodelistEntryMap entry = createNodelistEntryMap(fields, keyword);
-            insertIntoMap(nodelistEntries, entry, keyword, nodeNumber, context);
-            
+
+            NodelistEntryMap entry = new NodelistEntryMap(
+                    keyword, fields[2], fields[3], fields[4], fields[5],
+                    parseBaudRate(fields[6]),
+                    ParserUtils.extractFlags(fields),
+                    new HashMap<>()
+            );
+
+            insertIntoMap(entries, entry, keyword, nodeNumber, ctx);
         } catch (Exception e) {
-            // Skip malformed entries
+            // skip malformed entries
         }
     }
-    
-    /**
-     * Insert entry into the hierarchical map structure
-     */
-    private static void insertIntoMap(Map<Integer, NodelistEntryMap> nodelistEntries, 
-                                     NodelistEntryMap entry, Keywords keyword, 
-                                     Integer nodeNumber, MapParsingContext context) {
+
+    private static void insertIntoMap(Map<Integer, NodelistEntryMap> entries,
+                                      NodelistEntryMap entry, Keywords keyword,
+                                      Integer nodeNumber, ParserUtils.ParsingContext ctx) {
         if (keyword == Keywords.ZONE) {
-            nodelistEntries.put(nodeNumber, entry);
-            context.setCurrentZone(nodeNumber);
-            context.setCurrentTree(MapParsingContext.TreeLevel.ZONE);
+            entries.put(nodeNumber, entry);
+            ctx.setCurrentZone(nodeNumber);
+            ctx.setCurrentTree(ParserUtils.ParsingContext.TreeLevel.ZONE);
         } else if (keyword == Keywords.HOST || keyword == Keywords.REGION) {
-            if (context.getCurrentZone() != null && nodelistEntries.containsKey(context.getCurrentZone())) {
-                nodelistEntries.get(context.getCurrentZone()).children().put(nodeNumber, entry);
-                context.setCurrentNetwork(nodeNumber);
-                context.setCurrentTree(MapParsingContext.TreeLevel.NETWORK);
+            if (ctx.getCurrentZone() != null && entries.containsKey(ctx.getCurrentZone())) {
+                entries.get(ctx.getCurrentZone()).children().put(nodeNumber, entry);
+                ctx.setCurrentNetwork(nodeNumber);
+                ctx.setCurrentTree(ParserUtils.ParsingContext.TreeLevel.NETWORK);
             }
         } else {
-            // Regular node entry (keyword is null or other types)
-            if (context.getCurrentZone() != null && nodelistEntries.containsKey(context.getCurrentZone())) {
-                if (context.getCurrentTree() == MapParsingContext.TreeLevel.ZONE) {
-                    // Direct child of zone
-                    nodelistEntries.get(context.getCurrentZone()).children().put(nodeNumber, entry);
-                } else if (context.getCurrentTree() == MapParsingContext.TreeLevel.NETWORK && 
-                          context.getCurrentNetwork() != null) {
-                    // Child of network
-                    NodelistEntryMap networkEntry = nodelistEntries.get(context.getCurrentZone())
-                                                                  .children()
-                                                                  .get(context.getCurrentNetwork());
-                    if (networkEntry != null) {
-                        networkEntry.children().put(nodeNumber, entry);
-                    }
+            // Regular node — place under current zone or network
+            if (ctx.getCurrentZone() == null || !entries.containsKey(ctx.getCurrentZone())) {
+                return;
+            }
+            if (ctx.getCurrentTree() == ParserUtils.ParsingContext.TreeLevel.ZONE) {
+                entries.get(ctx.getCurrentZone()).children().put(nodeNumber, entry);
+            } else if (ctx.getCurrentTree() == ParserUtils.ParsingContext.TreeLevel.NETWORK
+                    && ctx.getCurrentNetwork() != null) {
+                NodelistEntryMap networkEntry = entries.get(ctx.getCurrentZone())
+                        .children()
+                        .get(ctx.getCurrentNetwork());
+                if (networkEntry != null) {
+                    networkEntry.children().put(nodeNumber, entry);
                 }
             }
         }
     }
-    
-    /**
-     * Preprocess line to handle edge cases
-     */
-    private static String preprocessLine(String line) {
-        if (line.startsWith(FIELD_SEPARATOR)) {
-            return EMPTY_KEYWORD_FIX + line;
-        }
-        return line;
-    }
-    
-    /**
-     * Create NodelistEntryMap from parsed fields
-     */
-    private static NodelistEntryMap createNodelistEntryMap(String[] fields, Keywords keyword) {
-        Integer baudRate = parseInteger(fields[6]);
-        if (baudRate == null) {
-            baudRate = 0; // Default value for malformed baud rate
-        }
-        
-        String[] flags = extractFlags(fields);
-        
-        return new NodelistEntryMap(
-            keyword, fields[2], fields[3], fields[4], fields[5],
-            baudRate, flags, new HashMap<>()
-        );
-    }
-    
-    /**
-     * Extract flags from fields array
-     */
-    private static String[] extractFlags(String[] fields) {
-        if (fields.length <= MIN_FIELDS_REQUIRED) {
-            return new String[0];
-        }
-        return Arrays.copyOfRange(fields, MIN_FIELDS_REQUIRED, fields.length);
-    }
-    
-    /**
-     * Parse integer with null safety
-     */
-    private static Integer parseInteger(String value) {
-        if (value == null || value.trim().isEmpty()) {
-            return null;
-        }
-        try {
-            return Integer.parseInt(value.trim());
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-    
-    /**
-     * Internal class to track map parsing context
-     */
-    private static class MapParsingContext {
-        enum TreeLevel { ZONE, NETWORK }
-        
-        private Integer currentZone;
-        private Integer currentNetwork;
-        private TreeLevel currentTree;
-        
-        public Integer getCurrentZone() { return currentZone; }
-        public void setCurrentZone(Integer zone) { this.currentZone = zone; }
-        
-        public Integer getCurrentNetwork() { return currentNetwork; }
-        public void setCurrentNetwork(Integer network) { this.currentNetwork = network; }
-        
-        public TreeLevel getCurrentTree() { return currentTree; }
-        public void setCurrentTree(TreeLevel tree) { this.currentTree = tree; }
+
+    private static Integer parseBaudRate(String value) {
+        Integer rate = ParserUtils.parseInteger(value);
+        return rate != null ? rate : 0;
     }
 }
