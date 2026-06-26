@@ -14,7 +14,7 @@ from files or input streams, index them in memory, and retrieve specific entries
 
 ### Prerequisites
 
-- Java 21
+- Java 25
 - Maven or Gradle for dependency management
 - Setting up GitHub Packages in your project
 
