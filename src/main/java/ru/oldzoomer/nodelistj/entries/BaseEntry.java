@@ -4,10 +4,8 @@ import ru.oldzoomer.nodelistj.enums.Keywords;
 
 /**
  * Common sealed interface for Fidonet nodelist entries.
- * Both flat ({@link NodelistEntry}) and hierarchical ({@link NodelistEntryMap})
- * entries share these core fields.
  */
-public sealed interface BaseEntry permits NodelistEntry, NodelistEntryMap {
+public sealed interface BaseEntry permits NodelistEntry {
 
     Keywords keywords();
 

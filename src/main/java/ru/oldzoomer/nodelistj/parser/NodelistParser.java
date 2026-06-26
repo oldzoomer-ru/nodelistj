@@ -13,8 +13,7 @@ import java.util.List;
 /**
  * Parses a Fidonet nodelist from an {@link InputStream} into a flat list of {@link NodelistEntry} records.
  *
- * <p>Delegates shared parsing utilities to {@link ParserUtils} to avoid duplication
- * with {@link NodelistMapParser}.</p>
+ * <p>Delegates shared parsing utilities to {@link ParserUtils}.</p>
  */
 public final class NodelistParser {
 

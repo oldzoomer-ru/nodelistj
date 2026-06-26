@@ -4,8 +4,7 @@ import java.util.Arrays;
 
 /**
  * Shared parsing utilities for Fidonet Nodelist parsers.
- * Consolidates common constants, helper methods, and parsing context
- * previously duplicated across {@link NodelistParser} and {@link NodelistMapParser}.
+ * Consolidates common constants, helper methods, and parsing context.
  */
 final class ParserUtils {
 
